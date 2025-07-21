@@ -1,4 +1,6 @@
-project-root/
+# Pola (Policy Language Assistant)
+
+/
 ├── frontend/                     # Your Next.js app (TypeScript)
 │   ├── public/                   # Static files (images, fonts, etc.)
 │   ├── src/
