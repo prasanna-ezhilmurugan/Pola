@@ -1,22 +1,42 @@
 from flask import Flask, jsonify, request
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return jsonify({"message": "Welcome to the Document Ingestion API"}), 200
+app.config['AUTH_BEARER'] = os.getenv('AUTH_BEARER')
 
-@app.route('/upload', methods=['POST'])
-def upload():
-  if 'file' in request.files:
-    file = request.files['file']
-    file.save(file.filename)
-    return jsonify({"message": "File received", "filename": file.filename}), 200
-  elif request.is_json:
+@app.route('/hackrx/run', methods=['POST'])
+def hackrx_run():
+  # check for authorization header
+  auth_header = request.headers.get('Authorization')
+  if not auth_header or not auth_header.startswith('Bearer '):
+    return jsonify({'error': 'Unauthorized'}), 401
+  
+  # check for valid token
+  token = auth_header.split(' ')[1]
+  if token != app.config['AUTH_BEARER']:
+    return jsonify({'error': 'Invalid token'}), 403
+  
+  try:
     data = request.get_json()
-    return jsonify({"message": "JSON data received", "data": data}), 200
-  else:
-    return jsonify({"error": "No file or JSON data provided"}), 400
+    document_url = data.get('documents')
+    questions = data.get('questions')
+
+    if not document_url or not questions:
+      return jsonify({"error": "Missing fields in request"}), 400
+    
+    #############################################################
+
+    dummy = ["prasanna ezhilmurugan"]
+
+    return jsonify({"answers": dummy}), 200
+
+  except Exception as e:
+    return jsonify({"error": str(e)}), 400
   
 if __name__ == '__main__':
   app.run(debug=True)
+
