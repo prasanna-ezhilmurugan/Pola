@@ -2,13 +2,17 @@ from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 import os
 
+import util.download_file as download_file
+from populate_db import load_documents, split_documents, add_to_chroma
+from query import query_rag
+
 load_dotenv()
 
 app = Flask(__name__)
 
 app.config['AUTH_BEARER'] = os.getenv('AUTH_BEARER')
 
-@app.route('/hackrx/run', methods=['POST'])
+@app.route('/api/v1/hackrx/run', methods=['POST'])
 def hackrx_run():
   # check for authorization header
   auth_header = request.headers.get('Authorization')
@@ -29,8 +33,12 @@ def hackrx_run():
       return jsonify({"error": "Missing fields in request"}), 400
     
     #############################################################
+    documents = load_documents()
+    chunks = split_documents(documents)
+    add_to_chroma(chunks)
 
-    dummy = ["prasanna ezhilmurugan"]
+    dummy = [query_rag(questions[0])]
+    #############################################################
 
     return jsonify({"answers": dummy}), 200
 
