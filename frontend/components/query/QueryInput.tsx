@@ -80,7 +80,7 @@ export default function QueryInput({
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <ArrowUp className="w-5 h-5" />
+              <ArrowUp className="w-5 h-5 text-policy-accent-teal" />
             )}
           </button>
         </div>
