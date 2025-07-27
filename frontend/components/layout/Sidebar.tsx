@@ -70,7 +70,7 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-full bg-policy-primary border-r border-policy-secondary transition-all duration-300 ease-in-out z-40',
+        'fixed left-0 top-0 h-full bg-policy-sidebar border-r border-policy-secondary transition-all duration-300 ease-in-out z-40',
         isCollapsed ? 'w-16' : 'w-60',
         className
       )}
@@ -92,8 +92,8 @@ export default function Sidebar({ className }: SidebarProps) {
 
       <div className="p-4 border-b border-policy-secondary">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-policy-accent rounded-lg flex items-center justify-center">
-            <Search className="w-4 h-4 text-policy-primary" />
+          <div className="w-8 h-8 bg-policy-card rounded-lg flex items-center justify-center">
+            <Search className="w-4 h-4 text-policy-accent-teal" />
           </div>
           {!isCollapsed && (
             <h1 className="text-policy-text font-semibold text-lg">
@@ -109,7 +109,7 @@ export default function Sidebar({ className }: SidebarProps) {
             {/* Recent Queries Section */}
             <section>
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-policy-accent" />
+                <Clock className="w-4 h-4 text-policy-accent-teal" />
                 <h2 className="text-policy-text font-medium text-sm">
                   Recent Queries
                 </h2>
@@ -128,7 +128,7 @@ export default function Sidebar({ className }: SidebarProps) {
                       <span className="text-policy-text-muted text-xs">
                         {formatTimeAgo(query.timestamp)}
                       </span>
-                      <span className="bg-policy-accent text-policy-primary text-xs px-2 py-0.5 rounded-full">
+                      <span className="bg-policy-accent text-policy-text text-xs px-2 py-0.5 rounded-full">
                         {query.entityCount}
                       </span>
                     </div>
@@ -192,7 +192,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 title="Recent Queries"
                 aria-label="Show recent queries"
               >
-                <Clock className="w-5 h-5 text-policy-accent" />
+                <Clock className="w-5 h-5 text-policy-accent-teal" />
               </button>
               <button
                 className="w-10 h-10 bg-policy-card hover:bg-policy-secondary rounded-lg flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-policy-accent-teal"

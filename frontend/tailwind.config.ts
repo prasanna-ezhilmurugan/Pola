@@ -12,13 +12,14 @@ const config: Config = {
       colors: {
         // Custom Policy System Colors
         policy: {
-          primary: '#232B3E',     // deep navy
-          secondary: '#222E44',   // slate
-          card: '#293552',        // lighter dark
-          accent: '#2DB6F5',      // cyan blue
-          'accent-teal': '#37D6AE', // teal
+          primary: '#181818',
+          sidebar: '#202020' ,     // deep navy
+          secondary: '#111113',   // slate
+          card: '#2b2b2eff',        // lighter dark
+          accent: '#3b3f42ff',      // cyan blue
+          'accent-teal': '#c9bcbcff', // teal
           text: '#F5F6FA',        // off-white
-          'text-muted': '#8A98B8', // muted grey
+          'text-muted': '#6B7280', // muted grey
         },
         // Keep existing shadcn colors
         background: 'hsl(var(--background))',
