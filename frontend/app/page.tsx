@@ -47,8 +47,27 @@ export default function Home() {
     console.log("Highlight selected:", highlight);
   }, []);
 
-  const handleUpload = useCallback((files: File[]) => {
-    console.log("Files uploaded:", files);
+  const handleUpload = useCallback(async (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+      const data = await response.json();
+      console.log("Upload successful:", data);
+      // Handle successful upload (e.g., update state, show success message)
+    } catch (error) {
+      console.error("Upload error:", error);
+      // Handle upload error (e.g., show error message)
+    }
   }, []);
 
   return (
