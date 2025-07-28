@@ -19,7 +19,7 @@ const config: Config = {
           accent: '#3b3f42ff',      // cyan blue
           'accent-teal': '#c9bcbcff', // teal
           text: '#F5F6FA',        // off-white
-          'text-muted': '#6B7280', // muted grey
+          'text-muted': '#cfd4dfff', // muted grey
         },
         // Keep existing shadcn colors
         background: 'hsl(var(--background))',

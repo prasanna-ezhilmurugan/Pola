@@ -58,10 +58,10 @@ export default function Home() {
           {/* Header */}
           <header className="mb-8">
             <h1 className="text-3xl font-bold text-policy-text mb-2">
-              Policy Retrieval System
+              POLA -  Policy Language Assistant
             </h1>
             <p className="text-policy-text-muted">
-              Analyze policy documents and process queries with AI-powered insights
+              Analyze documents and process queries with AI-powered insights
             </p>
           </header>
 
