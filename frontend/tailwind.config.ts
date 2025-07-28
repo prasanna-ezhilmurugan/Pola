@@ -12,8 +12,8 @@ const config: Config = {
       colors: {
         // Custom Policy System Colors
         policy: {
-          primary: '#181818',
-          sidebar: '#202020' ,     // deep navy
+          primary: '#202020',
+          sidebar: '#181818' ,     // deep navy
           secondary: '#111113',   // slate
           card: '#2b2b2eff',        // lighter dark
           accent: '#3b3f42ff',      // cyan blue
