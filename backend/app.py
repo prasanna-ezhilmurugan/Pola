@@ -40,6 +40,7 @@ def hackrx_run():
     chunks = split_documents(documents)
     add_to_chroma(chunks)
 
+
     # query rag and store the response in a list
     response = []
     for question in questions :
