@@ -34,22 +34,24 @@ def hackrx_run():
 
     if not document_url or not questions:
       return jsonify({"error": "Missing fields in request"}), 400
-    
-    #############################################################
+
+    # process the document and add to the database 
     documents = load_documents()
     chunks = split_documents(documents)
     add_to_chroma(chunks)
 
-    dummy = [query_rag(questions[1])]
-    #############################################################
 
-    return jsonify({"answers": dummy}), 200
+    # query rag and store the response in a list
+    response = []
+    for question in questions :
+      response.append(query_rag(question))
+
+    return jsonify({"answers": response}), 200
 
   except Exception as e:
     return jsonify({"error": str(e)}), 400
-  
 
-  
+
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
   try:
@@ -70,6 +72,54 @@ def upload_file():
 
   except Exception as e:
       return jsonify({'error': str(e)}), 400
+  
+
+@app.route('/api/query', methods=['POST'])
+def query():
+  try:
+    data = request.get_json()
+    query_text = data.get('query')
+
+    if not query_text:
+      return jsonify({'error': 'Query text is required'}), 400
+
+    #######################################
+    print(query_text)
+    response = {
+        "id": "result-123",
+        "decision": "approved",
+        "amount": "10000",
+        "justification": f"Query '{query}' meets all requirements. Prasanna Ezhilmurugan!!!",
+        "confidence": 0.92,
+        "clauseMappings": [
+            {
+                "id": "clause-1",
+                "clause": "Applicant age is above 18.",
+                "section": "Eligibility",
+                "relevance": "high",
+                "pageNumber": 2,
+                "highlighted": True
+            },
+            {
+                "id": "clause-2",
+                "clause": "Policy covers the requested amount.",
+                "section": "Coverage",
+                "relevance": "medium",
+                "pageNumber": 5,
+                "highlighted": False
+            }
+        ],
+        "details": {
+            "policySection": "General Terms",
+            "riskAssessment": "Low risk",
+            "additionalNotes": "All documents verified."
+        }
+    }
+    #######################################
+    return jsonify(response) ,200
+
+  except Exception as e:
+    return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
   app.run(debug=True)

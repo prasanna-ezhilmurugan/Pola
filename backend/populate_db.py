@@ -4,6 +4,7 @@ from langchain.schema import Document
 from langchain_chroma import Chroma
 
 from util.embedding_function import get_embedding_function
+
 CHROMA_PATH = "../data/processed"
 
 def load_documents():
@@ -16,7 +17,7 @@ def split_documents(documents :list[Document]):
 
 def add_to_chroma(documents :list[Document]):
   #load the existing database
+
   db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())  
   db.add_documents(documents)
   print("Documents added to Chroma successfully.")
-
