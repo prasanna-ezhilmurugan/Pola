@@ -32,11 +32,27 @@ export default function Home() {
     setSelectedClause(null);
 
     // Simulate API call
-    setTimeout(() => {
-      setResult(mockPolicyResult);
+    try {
+      const response = await fetch("http://localhost:5000/api/query", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Query failed");
+      }
+
+      const data = await response.json();
+      setResult(data);
       setShowResults(true);
+    } catch (error) {
+      console.error("Query error : ", error);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   }, []);
 
   const handleClauseSelect = useCallback((clause: ClauseMapping) => {
