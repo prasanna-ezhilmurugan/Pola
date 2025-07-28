@@ -1,4 +1,4 @@
-from langchain_community.vectorstores.chroma import Chroma
+from langchain_chroma import Chroma
 from langchain.prompts import PromptTemplate
 from langchain_community.llms.ollama import Ollama
 from util.embedding_function import get_embedding_function

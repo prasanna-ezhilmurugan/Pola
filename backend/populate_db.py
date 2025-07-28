@@ -1,7 +1,7 @@
 from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 from util.embedding_function import get_embedding_function
 CHROMA_PATH = "../data/processed"
@@ -18,6 +18,5 @@ def add_to_chroma(documents :list[Document]):
   #load the existing database
   db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())  
   db.add_documents(documents)
-  db.persist()
   print("Documents added to Chroma successfully.")
 

@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
@@ -9,8 +10,10 @@ from query import query_rag
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['AUTH_BEARER'] = os.getenv('AUTH_BEARER')
+UPLOAD_FOLDER = '../data/upload'
 
 @app.route('/api/v1/hackrx/run', methods=['POST'])
 def hackrx_run():
@@ -37,7 +40,7 @@ def hackrx_run():
     chunks = split_documents(documents)
     add_to_chroma(chunks)
 
-    dummy = [query_rag(questions[0])]
+    dummy = [query_rag(questions[1])]
     #############################################################
 
     return jsonify({"answers": dummy}), 200
@@ -45,6 +48,29 @@ def hackrx_run():
   except Exception as e:
     return jsonify({"error": str(e)}), 400
   
+
+  
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+  try:
+    if 'files' not in request.files:
+      return jsonify({'error': 'No files part in the request'}), 400
+    
+    files = request.files.getlist('files')
+    saved_files = []
+    for file in files:
+        # Save the file or process it as needed
+        file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+        saved_files.append(file.filename)
+
+    return jsonify({'uploaded': saved_files}), 200
+
+  except Exception as e:
+    return jsonify({'error': str(e)}), 400
+
+  except Exception as e:
+      return jsonify({'error': str(e)}), 400
+
 if __name__ == '__main__':
   app.run(debug=True)
 
