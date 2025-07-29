@@ -32,7 +32,7 @@ def split_documents(documents):
   # return text_splitter.split_documents(documents)
   return records
 
-def add_to_chroma(documents):
+def add_to_pinecone(documents):
   # if os.path.exists(CHROMA_PATH):
   #   shutil.rmtree(CHROMA_PATH)
 

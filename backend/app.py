@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 
 import util.download_file as download_file
-from populate_db import load_documents, split_documents, add_to_chroma
+from populate_db import load_documents, split_documents, add_to_pinecone
 from query import query_rag
 
 load_dotenv()
@@ -36,9 +36,9 @@ def hackrx_run():
       return jsonify({"error": "Missing fields in request"}), 400
 
     # process the document and add to the database 
-    documents = load_documents(document_url)
-    chunks = split_documents(documents)
-    add_to_chroma(chunks)
+    document = load_documents(document_url)
+    chunks = split_documents(document)
+    add_to_pinecone(chunks)
 
 
     # query rag and store the response in a list
