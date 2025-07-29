@@ -41,19 +41,6 @@ export default function Sidebar({ className }: SidebarProps) {
     }
   };
 
-  const getFileIcon = (type: DocumentHistoryItem['type']) => {
-    switch (type) {
-      case 'pdf':
-        return '📄';
-      case 'docx':
-        return '📝';
-      case 'email':
-        return '📧';
-      default:
-        return '📄';
-    }
-  };
-
   const getStatusColor = (status: DocumentHistoryItem['status']) => {
     switch (status) {
       case 'processed':
@@ -153,9 +140,7 @@ export default function Sidebar({ className }: SidebarProps) {
                     aria-label={`Document: ${doc.name}`}
                   >
                     <div className="flex items-start gap-2">
-                      <span className="text-lg" role="img" aria-label={`${doc.type} file`}>
-                        {getFileIcon(doc.type)}
-                      </span>
+                    
                       <div className="flex-1 min-w-0">
                         <p className="text-policy-text text-xs font-medium truncate">
                           {doc.name}
