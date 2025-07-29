@@ -13,7 +13,6 @@ CHROMA_PATH = "../data/processed"
 
 def load_documents(url):
   loader = PyPDFLoader(url)
-  print(loader)
   return loader.load()
 
 def split_documents(documents):
@@ -58,7 +57,6 @@ def add_to_pinecone(documents):
                               }) 
 
   for i in range(0, len(documents), 90):
-
       index.upsert_records(namespace=index_name, records=documents[i:i + 90])
 
   print("-" * 40)
