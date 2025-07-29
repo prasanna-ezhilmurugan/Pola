@@ -40,7 +40,7 @@ def query_rag(query_text: str):
   results = index.search(
     namespace= index_name,
     query = {
-      "top_k": 3,
+      "top_k": 5,
       "inputs" : {"text": query_text},
     }
   )
