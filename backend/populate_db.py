@@ -1,4 +1,4 @@
-from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
+from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 # from langchain_chroma import Chroma
@@ -11,8 +11,9 @@ import time
 
 CHROMA_PATH = "../data/processed"
 
-def load_documents():
-  loader = PyPDFDirectoryLoader(r"../data/raw")
+def load_documents(url):
+  loader = PyPDFLoader(url)
+  print(loader)
   return loader.load()
 
 def split_documents(documents):

@@ -36,7 +36,7 @@ def hackrx_run():
       return jsonify({"error": "Missing fields in request"}), 400
 
     # process the document and add to the database 
-    documents = load_documents()
+    documents = load_documents(document_url)
     chunks = split_documents(documents)
     add_to_chroma(chunks)
 
