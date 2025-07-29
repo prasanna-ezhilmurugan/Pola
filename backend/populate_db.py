@@ -8,58 +8,62 @@ from pinecone import Pinecone
 
 import os
 import time
+import asyncio
 
 CHROMA_PATH = "../data/processed"
 
-def load_documents(url):
-  loader = PyPDFLoader(url)
-  return loader.load()
+async def load_documents(url):
+    loader = PyPDFLoader(url)
+    # If loader.load() is blocking, run in a thread
+    return await asyncio.to_thread(loader.load)
 
-def split_documents(documents):
-  text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=70, add_start_index=True)
+async def split_documents(documents):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50, add_start_index=True)
+    def split():
+        records = []
+        for idx, split in enumerate(text_splitter.split_documents(documents)):
+            records.append({
+                "_id": f"document#chunk{idx}",
+                "author": split.metadata["author"],
+                "start_index": split.metadata["start_index"],
+                "page": split.metadata["page"],
+                "page_label": split.metadata["page_label"],
+                "chunk_text": split.page_content
+            })
+        return records
+    return await asyncio.to_thread(split)
 
-  records = []
-  for idx, split in enumerate(text_splitter.split_documents(documents)):
-    records.append({
-        "_id": f"document#chunk{idx}",
-        "author": split.metadata["author"],
-        "start_index": split.metadata["start_index"],
-        "page": split.metadata["page"],
-        "page_label": split.metadata["page_label"],
-        "chunk_text": split.page_content
-    })
-  # return text_splitter.split_documents(documents)
-  return records
+async def add_to_pinecone(documents):
+    start = time.time()
+    pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
+    index = pc.Index(host=os.getenv('PINECONE_HOST'))
 
-def add_to_pinecone(documents):
-  # if os.path.exists(CHROMA_PATH):
-  #   shutil.rmtree(CHROMA_PATH)
+    index_name = "pola-index"
+    if not pc.has_index(index_name):
+        await asyncio.to_thread(
+            pc.create_index_for_model,
+            name=index_name,
+            cloud="aws",
+            region="us-east-1",
+            embed={
+                "model": "llama-text-embed-v2",
+                "field_map": {
+                    "text": "chunk_text"
+                }
+            }
+        )
 
-  #load the existing database
-  start = time.time()
-  
-  # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())  
-  # db.add_documents(documents)
+    async def upsert_chunk(chunk):
+        await asyncio.to_thread(index.upsert_records, namespace=index_name, records=chunk)
 
-  pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-  index = pc.Index(host=os.getenv('PINECONE_HOST'))
+    # Upsert in parallel for better performance
+    tasks = []
+    for i in range(0, len(documents), 90):
+        chunk = documents[i:i + 90]
+        tasks.append(upsert_chunk(chunk))
+    await asyncio.gather(*tasks)
 
-  index_name = "pola-index"
-  if not pc.has_index(index_name):
-    pc.create_index_for_model(name=index_name,
-                              cloud="aws",
-                              region="us-east-1",
-                              embed={
-                                  "model": "llama-text-embed-v2",
-                                  "field_map": {
-                                      "text": "chunk_text"
-                                  }
-                              }) 
-
-  for i in range(0, len(documents), 90):
-      index.upsert_records(namespace=index_name, records=documents[i:i + 90])
-
-  print("-" * 40)
-  print("Documents added to Pinecone successfully.")
-  print(f"Time taken to embed: {time.time() - start} seconds")
-  print("-" * 40)
+    print("-" * 40)
+    print("Documents added to Pinecone successfully.")
+    print(f"Time taken to embed: {time.time() - start} seconds")
+    print("-" * 40)

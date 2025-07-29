@@ -1,3 +1,4 @@
+import asyncio
 from langchain_chroma import Chroma
 from langchain.prompts import PromptTemplate
 # from langchain_community.llms.ollama import Ollama
@@ -30,42 +31,43 @@ You are an intelligent assistant designed to extract precise answers from insura
 # FINAL ANSWER:
 """
 
-def query_rag(query_text: str):
-  # embedding_function = get_embedding_function()
-  # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+async def query_rag(query_text: str):
+    # embedding_function = get_embedding_function()
+    # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
-  db = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-  index_name = "pola-index"
-  index = db.Index(host=os.getenv('PINECONE_HOST'))
-  results = index.search(
-    namespace= index_name,
-    query = {
-      "top_k": 5,
-      "inputs" : {"text": query_text},
-    }
-  )
-  context_text = []
-  for result in results['result']['hits']:
-    context_text.append(str(result['fields']))
-  context_text = "\n\n---\n\n".join(context_text)
+    db = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
+    index_name = "pola-index"
+    index = db.Index(host=os.getenv('PINECONE_HOST'))
 
-  prompt_template = PromptTemplate.from_template(PROMPT_TEMPLATE)
-  prompt = prompt_template.format(context = context_text, question=query_text)
+    # Run blocking Pinecone search in a thread
+    results = await asyncio.to_thread(
+        index.search,
+        namespace=index_name,
+        query={
+            "top_k": 5,
+            "inputs": {"text": query_text},
+        }
+    )
 
-  # model = Ollama(model="Phi4-mini")
-  # response_text = model.invoke(prompt)
+    context_text = []
+    for result in results['result']['hits']:
+        context_text.append(str(result['fields']))
+    context_text = "\n\n---\n\n".join(context_text)
 
-  start = time.time()
+    prompt_template = PromptTemplate.from_template(PROMPT_TEMPLATE)
+    prompt = prompt_template.format(context=context_text, question=query_text)
 
-  client = Mistral(api_key=os.getenv('MISTRAL_API_KEY')) 
-  chat_response = client.chat.complete(
-    model="mistral-tiny",
-    messages=[
-      {"role": "user", "content": prompt}
-    ]
-  )
+    # Run blocking Mistral API call in a thread
+    start = time.time()
+    client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
+    chat_response = await asyncio.to_thread(
+        client.chat.complete,
+        model="mistral-medium",
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    print(f"Time taken to query: {time.time() - start} seconds")
 
-  print(f"Time taken to query: {time.time() - start} seconds")
-
-  # return response_text
-  return chat_response.choices[0].message.content
+    # return response_text
+    return chat_response.choices[0].message.content
