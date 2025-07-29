@@ -147,7 +147,7 @@ export default function DocumentUploader({ onUpload, className }: DocumentUpload
       {/* Upload Zone */}
       <div
         className={cn(
-          'relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ease-in-out',
+          'relative border-2 border-dashed rounded-xl p-32 min-h-[300px] text-center transition-all duration-300 ease-in-out',
           dragActive 
             ? 'border-policy-accent bg-policy-accent/10' 
             : 'border-policy-text-muted hover:border-policy-accent hover:bg-policy-card/50',

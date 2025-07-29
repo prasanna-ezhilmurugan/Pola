@@ -5,8 +5,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Policy Retrieval System',
-  description: 'Comprehensive policy document analysis and retrieval interface',
+  title: 'Poliy Language Assistant',
+  description: 'Comprehensive  document analysis and retrieval interface',
 };
 
 export default function RootLayout({

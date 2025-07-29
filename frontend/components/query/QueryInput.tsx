@@ -57,7 +57,7 @@ export default function QueryInput({
             placeholder={placeholder}
             disabled={isLoading}
             className={cn(
-              'flex-1 bg-transparent px-4 py-3 text-policy-text placeholder-policy-text-muted',
+              'flex-1 bg-transparent px-4 py-6 text-policy-text placeholder-policy-text-muted',
               'focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
               'text-base'
             )}
@@ -69,10 +69,10 @@ export default function QueryInput({
             type="submit"
             disabled={isDisabled}
             className={cn(
-              'mr-2 p-2 rounded-lg transition-all duration-200',
+              'mr-2 p-5 rounded-lg transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-policy-accent focus:ring-offset-2 focus:ring-offset-policy-card',
               isDisabled
-                ? 'bg-policy-secondary text-policy-text-muted cursor-not-allowed'
+                ? 'bg-policy-primary text-policy-text-muted cursor-not-allowed'
                 : 'bg-policy-accent text-policy-primary hover:bg-policy-accent/90 hover:scale-105'
             )}
             aria-label={isLoading ? 'Processing query' : 'Submit query'}

@@ -129,7 +129,7 @@ export default function ResultsPanel({ result, onClauseSelect, className }: Resu
             </h3>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center gap-1 text-property-accent hover:text-policy-accent/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-policy-accent rounded-lg px-2 py-1"
+              className="flex items-center gap-1 text-property-accent hover:text-policy-text transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-policy-accent rounded-lg px-2 py-1"
               aria-expanded={showDetails}
               aria-label={showDetails ? 'Hide details' : 'Show details'}
             >
@@ -199,7 +199,7 @@ export default function ResultsPanel({ result, onClauseSelect, className }: Resu
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-policy-text font-medium text-sm group-hover:text-policy-accent transition-colors duration-200">
+                      <h4 className="text-policy-text font-medium text-sm group-hover:text-policy-text-muted transition-colors duration-200">
                         {clause.clause}
                       </h4>
                       <div className="flex items-center gap-2">
