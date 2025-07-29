@@ -62,7 +62,7 @@ async def query_rag(query_text: str):
     client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
     chat_response = await asyncio.to_thread(
         client.chat.complete,
-        model="mistral-medium",
+        model="mistral-tiny",
         messages=[
             {"role": "user", "content": prompt}
         ]
