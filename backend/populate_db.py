@@ -24,7 +24,7 @@ async def split_documents(documents):
         for idx, split in enumerate(text_splitter.split_documents(documents)):
             records.append({
                 "_id": f"document#chunk{idx}",
-                "author": split.metadata["author"],
+                "author": split.metadata.get("author", "unknown"),
                 "start_index": split.metadata["start_index"],
                 "page": split.metadata["page"],
                 "page_label": split.metadata["page_label"],
