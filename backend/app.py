@@ -1,95 +1,74 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, status
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+import asyncio
 
-import util.download_file as download_file
 from populate_db import load_documents, split_documents, add_to_pinecone
 from query import query_rag
 
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.config['AUTH_BEARER'] = os.getenv('AUTH_BEARER')
+AUTH_BEARER = os.getenv('AUTH_BEARER')
 UPLOAD_FOLDER = '../data/upload'
 
-@app.route('/api/v1/hackrx/run', methods=['POST'])
-def hackrx_run():
-  # check for authorization header
-  auth_header = request.headers.get('Authorization')
-  if not auth_header or not auth_header.startswith('Bearer '):
-    return jsonify({'error': 'Unauthorized'}), 401
-  
-  # check for valid token
-  token = auth_header.split(' ')[1]
-  if token != app.config['AUTH_BEARER']:
-    return jsonify({'error': 'Invalid token'}), 403
-  
-  try:
-    data = request.get_json()
+@app.post("/api/v1/hackrx/run")
+async def hackrx_run(request: Request):
+    auth_header = request.headers.get('authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    token = auth_header.split(' ')[1]
+
+    if token != AUTH_BEARER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid token")
+
+    data = await request.json()
     document_url = data.get('documents')
     questions = data.get('questions')
 
     if not document_url or not questions:
-      return jsonify({"error": "Missing fields in request"}), 400
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing fields in request")
 
-    # process the document and add to the database 
-    document = load_documents(document_url)
-    chunks = split_documents(document)
-    add_to_pinecone(chunks)
+    document = await load_documents(document_url)
+    chunks = await split_documents(document)
+    await add_to_pinecone(chunks)
+    # You can use asyncio for parallel execution if query_rag is async
+    response = await asyncio.gather(*(query_rag(q) for q in questions))
 
+    return JSONResponse(content={"answers": response})
 
-    # query rag and store the response in a list
-    response = []
-    for question in questions :
-      response.append(query_rag(question))
-
-    return jsonify({"answers": response}), 200
-
-  except Exception as e:
-    return jsonify({"error": str(e)}), 400
-
-
-@app.route('/api/upload', methods=['POST'])
-def upload_file():
-  try:
-    if 'files' not in request.files:
-      return jsonify({'error': 'No files part in the request'}), 400
-    
-    files = request.files.getlist('files')
+@app.post("/api/upload")
+async def upload_file(files: list[UploadFile] = File(...)):
     saved_files = []
     for file in files:
-        # Save the file or process it as needed
-        file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+        file_location = os.path.join(UPLOAD_FOLDER, file.filename)
+        with open(file_location, "wb") as f:
+            f.write(await file.read())
         saved_files.append(file.filename)
+    return JSONResponse(content={'uploaded': saved_files})
 
-    return jsonify({'uploaded': saved_files}), 200
-
-  except Exception as e:
-    return jsonify({'error': str(e)}), 400
-
-  except Exception as e:
-      return jsonify({'error': str(e)}), 400
-  
-
-@app.route('/api/query', methods=['POST'])
-def query():
-  try:
-    data = request.get_json()
+@app.post("/api/query")
+async def query(request: Request):
+    data = await request.json()
     query_text = data.get('query')
-
     if not query_text:
-      return jsonify({'error': 'Query text is required'}), 400
-
-    #######################################
-    print(query_text)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Query text is required")
+    # Your mock response here
     response = {
         "id": "result-123",
         "decision": "approved",
         "amount": "10000",
-        "justification": f"Query '{query}' meets all requirements. Prasanna Ezhilmurugan!!!",
+        "justification": f"Query '{query_text}' meets all requirements. Prasanna Ezhilmurugan!!!",
         "confidence": 0.92,
         "clauseMappings": [
             {
@@ -115,12 +94,7 @@ def query():
             "additionalNotes": "All documents verified."
         }
     }
-    #######################################
-    return jsonify(response) ,200
+    return JSONResponse(content=response)
 
-  except Exception as e:
-    return jsonify({'error': str(e)}), 400
-
-if __name__ == '__main__':
-  app.run(debug=True)
+# To run: uvicorn app:app --reload
 
