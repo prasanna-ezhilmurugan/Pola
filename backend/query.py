@@ -10,22 +10,28 @@ import os
 CHROMA_PATH = "../data/processed"
 
 PROMPT_TEMPLATE = """
-Answer the question based on the following context:
+You are an intelligent assistant designed to extract precise answers from insurance policy documents. Use the following context to answer the question factually and concisely.
 
+# CONTEXT:
 {context}
 
----
+# QUESTION:
+{question}
 
-Answer the question based on the above context: {question}
+# INSTRUCTIONS:
+- Answer only if the context contains enough information.
+- Limit your answer to 1–3 clear, factual sentences.
+- Do not include disclaimers like "based on the context provided".
+- Mention specific clauses or section numbers only if directly present in the context.
+- Do not make assumptions or use external knowledge.
+- If the answer is not in the context, respond with: "The provided document does not contain the answer."
+
+# FINAL ANSWER:
 """
 
 def query_rag(query_text: str):
-  start = time.time()
-
   embedding_function = get_embedding_function()
   db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
-
-  print(f"Time taken to embed: {time.time() - start} seconds")
 
   # Search in the db
   results = db.similarity_search_with_score(query_text, k=5)
