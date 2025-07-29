@@ -95,6 +95,6 @@ async def query(request: Request):
         }
     }
     return JSONResponse(content=response)
-
+  
 # To run: uvicorn app:app --reload
 
