@@ -16,7 +16,7 @@ def load_documents(url):
   return loader.load()
 
 def split_documents(documents):
-  text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50, add_start_index=True)
+  text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=70, add_start_index=True)
 
   records = []
   for idx, split in enumerate(text_splitter.split_documents(documents)):

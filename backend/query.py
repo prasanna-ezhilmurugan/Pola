@@ -49,8 +49,6 @@ def query_rag(query_text: str):
     context_text.append(str(result['fields']))
   context_text = "\n\n---\n\n".join(context_text)
 
-  print(context_text)
-
   prompt_template = PromptTemplate.from_template(PROMPT_TEMPLATE)
   prompt = prompt_template.format(context = context_text, question=query_text)
 
