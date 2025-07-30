@@ -1,7 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 # from langchain_chroma import Chroma
-from pinecone import Pinecone
 
 # from util.embedding_function import get_embedding_function
 
@@ -14,6 +13,8 @@ from langchain_community.document_loaders import (
     UnstructuredEmailLoader,
     TextLoader,
 )
+
+from pinecone_client import index, pinecone_client
 
 import os
 import time
@@ -80,13 +81,11 @@ async def split_documents(documents):
 
 async def add_to_pinecone(documents, namespace):
     start = time.time()
-    pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-    index = pc.Index(host=os.getenv('PINECONE_HOST'))
 
     index_name = "pola-index"
-    if not pc.has_index(index_name):
+    if not pinecone_client.has_index(index_name):
         await asyncio.to_thread(
-            pc.create_index_for_model,
+            pinecone_client.create_index_for_model,
             name=index_name,
             cloud="aws",
             region="us-east-1",

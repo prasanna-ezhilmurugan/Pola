@@ -9,7 +9,7 @@ from populate_db import load_documents, split_documents, add_to_pinecone
 from query import query_rag
 from util.compute_hash import compute_hash
 
-from pinecone import Pinecone
+from pinecone_client import index
 
 load_dotenv()
 
@@ -51,8 +51,6 @@ async def hackrx_run(request: Request):
     namespace = f"doc-{document_hash}"
 
     # Step 2: Check if Pinecone namespace already exists
-    pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-    index = pc.Index(host=os.getenv('PINECONE_HOST'))
     existing = await asyncio.to_thread(index.describe_index_stats, namespace=namespace)
 
     # Step 3: If namespace does not exist, load and process the document
