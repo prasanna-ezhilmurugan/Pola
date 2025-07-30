@@ -7,6 +7,9 @@ import asyncio
 
 from populate_db import load_documents, split_documents, add_to_pinecone
 from query import query_rag
+from util.compute_hash import compute_hash
+
+from pinecone_client import index
 
 load_dotenv()
 
@@ -24,26 +27,43 @@ UPLOAD_FOLDER = '../data/upload'
 
 @app.post("/api/v1/hackrx/run")
 async def hackrx_run(request: Request):
+    # Check for authorization header
     auth_header = request.headers.get('authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     token = auth_header.split(' ')[1]
 
+    # Validate token
     if token != AUTH_BEARER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid token")
 
+    # Parse request body
     data = await request.json()
     document_url = data.get('documents')
     questions = data.get('questions')
 
+    # Validate required fields
     if not document_url or not questions:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing fields in request")
 
-    document = await load_documents(document_url)
-    chunks = await split_documents(document)
-    await add_to_pinecone(chunks)
+    # Step 1: Compute document hash to create a unique namespace 
+    document_hash = await compute_hash(document_url)
+    namespace = f"doc-{document_hash}"
+
+    # Step 2: Check if Pinecone namespace already exists
+    existing = await asyncio.to_thread(index.describe_index_stats, namespace=namespace)
+
+    # Step 3: If namespace does not exist, load and process the document
+    if existing.get('namespaces', {}).get(namespace, {}).get('recordCount', 0) == 0:
+      print(f"[INFO] Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
+      document = await load_documents(document_url)
+      chunks = await split_documents(document)
+      await add_to_pinecone(chunks, namespace)
+    else:
+      print(f"[INFO] Document already exists in index under namespace: {namespace}")
+
     # You can use asyncio for parallel execution if query_rag is async
-    response = await asyncio.gather(*(query_rag(q) for q in questions))
+    response = await asyncio.gather(*(query_rag(q, namespace) for q in questions))
 
     return JSONResponse(content={"answers": response})
 
