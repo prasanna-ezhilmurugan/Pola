@@ -33,7 +33,7 @@ async def split_documents(documents):
         return records
     return await asyncio.to_thread(split)
 
-async def add_to_pinecone(documents):
+async def add_to_pinecone(documents, namespace):
     start = time.time()
     pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
     index = pc.Index(host=os.getenv('PINECONE_HOST'))
@@ -54,14 +54,12 @@ async def add_to_pinecone(documents):
         )
 
     async def upsert_chunk(chunk):
-        await asyncio.to_thread(index.upsert_records, namespace=index_name, records=chunk)
+        await asyncio.to_thread(index.upsert_records, namespace=namespace, records=chunk)
 
     # Upsert in parallel for better performance
-    tasks = []
-    for i in range(0, len(documents), 90):
-        chunk = documents[i:i + 90]
-        tasks.append(upsert_chunk(chunk))
-    await asyncio.gather(*tasks)
+    for i in range(0, len(documents), 50):
+        chunk = documents[i:i + 50]
+        await upsert_chunk(chunk)
 
     print("-" * 40)
     print("Documents added to Pinecone successfully.")

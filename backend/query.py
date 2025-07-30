@@ -31,7 +31,7 @@ You are an intelligent assistant designed to extract precise answers from insura
 # FINAL ANSWER:
 """
 
-async def query_rag(query_text: str):
+async def query_rag(query_text: str, namespace: str):
     # embedding_function = get_embedding_function()
     # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
@@ -42,7 +42,7 @@ async def query_rag(query_text: str):
     # Run blocking Pinecone search in a thread
     results = await asyncio.to_thread(
         index.search,
-        namespace=index_name,
+        namespace=namespace,
         query={
             "top_k": 5,
             "inputs": {"text": query_text},
