@@ -28,6 +28,14 @@ def get_file_extension_from_url(url: str) -> str:
     ext = os.path.splitext(path)[-1].lower()
     return ext
 
+def normalize_metadata(metadata: dict) -> dict:
+    return {
+        "author": metadata.get("author", "Unknown"),
+        "page": metadata.get("page", "N/A"),
+        "start_index": metadata.get("start_index", 0),
+        "page_label": metadata.get("page_label", "")
+    }
+
 
 async def load_documents(url):
     ext = get_file_extension_from_url(url)
@@ -68,12 +76,10 @@ async def split_documents(documents):
     def split():
         records = []
         for idx, split in enumerate(text_splitter.split_documents(documents)):
+            meta = normalize_metadata(split.metadata)
             records.append({
                 "_id": f"document#chunk{idx}",
-                "author": split.metadata["author"],
-                "start_index": split.metadata["start_index"],
-                "page": split.metadata["page"],
-                "page_label": split.metadata["page_label"],
+                **meta,
                 "chunk_text": split.page_content
             })
         return records

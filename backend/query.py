@@ -59,13 +59,15 @@ async def retrive_context(query: str, namespace: str) -> str:
 async def ask_llm(query: str, context: str) -> str:
     prompt_template = PromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context, question=query)
+    
+    print(f"[INFO] Asking LLM with prompt: {prompt}")
 
     # Run blocking Mistral API call in a thread
     start = time.time()
     client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
     chat_response = await asyncio.to_thread(
         client.chat.complete,
-        model="mistral-tiny",
+        model="mistral-small",
         messages=[
             {"role": "user", "content": prompt}
         ]
