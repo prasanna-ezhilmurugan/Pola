@@ -1,4 +1,3 @@
-from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 # from langchain_chroma import Chroma
@@ -6,16 +5,62 @@ from pinecone import Pinecone
 
 # from util.embedding_function import get_embedding_function
 
+from urllib.parse import urlparse
+import tempfile
+import aiohttp
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    UnstructuredWordDocumentLoader,
+    UnstructuredEmailLoader,
+    TextLoader,
+)
+
 import os
 import time
 import asyncio
 
-CHROMA_PATH = "../data/processed"
+# CHROMA_PATH = "../data/processed"
+
+def get_file_extension_from_url(url: str) -> str:
+    parsed = urlparse(url)
+    path = parsed.path
+    ext = os.path.splitext(path)[-1].lower()
+    return ext
+
 
 async def load_documents(url):
-    loader = PyPDFLoader(url)
-    # If loader.load() is blocking, run in a thread
-    return await asyncio.to_thread(loader.load)
+    ext = get_file_extension_from_url(url)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                raise Exception(f"Failed to fetch document. Status: {response.status}")
+
+            content = await response.read()
+            with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp_file:
+                tmp_file.write(content)
+                tmp_file_path = tmp_file.name
+
+    try:
+
+        if ext == ".pdf":
+            loader = PyPDFLoader(tmp_file_path)
+        elif ext in ".docx":
+            loader = UnstructuredWordDocumentLoader(tmp_file_path)
+        elif ext in [".eml", ".msg"]:
+            loader = UnstructuredEmailLoader(tmp_file_path)
+        elif ext == ".txt":
+            loader = TextLoader(tmp_file_path) 
+        else:
+            raise Exception(f"Unsupported file type: {ext}")
+
+        return await asyncio.to_thread(loader.load)
+
+    finally:
+        # Clean up the temporary file
+        if os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
+  
 
 async def split_documents(documents):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50, add_start_index=True)
