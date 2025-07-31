@@ -54,13 +54,13 @@ async def hackrx_run(request: Request):
     existing = await asyncio.to_thread(index.describe_index_stats, namespace=namespace)
 
     # Step 3: If namespace does not exist, load and process the document
-    if existing.get('namespaces', {}).get(namespace, {}).get('recordCount', 0) == 0:
+    if existing.get('namespaces', {}).get(namespace, {}).get('vector_count', 0) > 0:
+      print(f"[INFO] Document already exists in index under namespace: {namespace}")
+    else:
       print(f"[INFO] Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
       document = await load_documents(document_url)
       chunks = await split_documents(document)
       await add_to_pinecone(chunks, namespace)
-    else:
-      print(f"[INFO] Document already exists in index under namespace: {namespace}")
 
     # You can use asyncio for parallel execution if query_rag is async
     response = await asyncio.gather(*(query_rag(q, namespace) for q in questions))
