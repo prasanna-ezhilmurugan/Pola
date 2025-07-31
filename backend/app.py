@@ -27,6 +27,9 @@ UPLOAD_FOLDER = '../data/upload'
 
 @app.post("/api/v1/hackrx/run")
 async def hackrx_run(request: Request):
+    # print request to text
+    print(f"[INFO] Received request: {await request.body()}")
+    
     # Check for authorization header
     auth_header = request.headers.get('authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
