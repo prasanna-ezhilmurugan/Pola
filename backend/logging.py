@@ -4,7 +4,6 @@ class LoggerState:
     buffer = []
     line_limit = 0
     lines = 0
-    curr = 0
     default_file = "logs.txt"
 
 global_logger_state = LoggerState()
@@ -19,13 +18,13 @@ def log_log(state, type, msg, timestamp):
     if state.line_limit > 0 and state.lines % state.line_limit == 0:
         log_append_to_file(state, state.default_file)
 
-def log_info(state, msg, timestamp=False):
+def log_info(state, msg, timestamp=True):
     log_log(state, "INFO", msg, timestamp)
 
-def log_warn(state, msg, timestamp=False):
+def log_warn(state, msg, timestamp=True):
     log_log(state, "WARN", msg, timestamp)
     
-def log_error(state, msg, timestamp=False):
+def log_error(state, msg, timestamp=True):
     log_log(state, "ERROR", msg, timestamp)
     
 def log_write_to_file(state, filename):
@@ -34,7 +33,6 @@ def log_write_to_file(state, filename):
         f.write("\n")
         f.flush()
     state.buffer.clear()
-    state.curr = 0
 
 def log_append_to_file(state, filename):
    with open(filename, "a") as f:
@@ -42,5 +40,4 @@ def log_append_to_file(state, filename):
         f.write("\n")
         f.flush()
    state.buffer.clear()
-   state.curr = 0
 
