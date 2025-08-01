@@ -88,21 +88,6 @@ async def split_documents(documents):
 async def add_to_pinecone(documents, namespace):
     start = time.time()
 
-    index_name = "pola-index"
-    if not pinecone_client.has_index(index_name):
-        await asyncio.to_thread(
-            pinecone_client.create_index_for_model,
-            name=index_name,
-            cloud="aws",
-            region="us-east-1",
-            embed={
-                "model": "llama-text-embed-v2",
-                "field_map": {
-                    "text": "chunk_text"
-                }
-            }
-        )
-
     async def upsert_chunk(chunk):
         await asyncio.to_thread(index.upsert_records, namespace=namespace, records=chunk)
 

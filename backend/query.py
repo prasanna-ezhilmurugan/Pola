@@ -14,23 +14,31 @@ import os
 # CHROMA_PATH = "../data/processed"
 
 PROMPT_TEMPLATE = """
-You are an intelligent assistant designed to extract precise answers from insurance policy documents. Use the following context to answer the question factually and concisely.
+You are a policy analyst AI trained to extract precise and structured answers from health insurance documents. Use the context provided to answer the user's question clearly and professionally.
 
-# CONTEXT:
+## CONTEXT:
 {context}
 
-# QUESTION:
+## QUESTION:
 {question}
 
-# INSTRUCTIONS:
-- Answer only if the context contains enough information.
-- Limit your answer to 1–3 clear, factual sentences.
-- Do not include disclaimers like "based on the context provided".
-- Mention specific clauses or section numbers only if directly present in the context.
-- Do not make assumptions or use external knowledge.
-- If the answer is not in the context, respond with: "The provided document does not contain the answer."
+## GUIDELINES:
+- Base your answer **only** on the context provided.
+- The answer should:
+  1. Start with a **direct yes/no or definition**, if applicable.
+  2. Include **conditions, eligibility, or policy duration**, if relevant.
+  3. Mention **numerical limits, caps, or time frames** when stated.
+  4. Quote or summarize clauses or sections **if they’re explicitly present**.
+- Do **not** fabricate or assume details not included in the context.
+- Avoid generic disclaimers (e.g., "based on the context").
+- If the answer is not present, say: **"The provided document does not contain the answer."**
 
-# FINAL ANSWER:
+## FORMAT:
+- Respond in 1–3 well-structured sentences.
+- Use clear and formal language.
+- Use policy-specific terms such as "Sum Insured", "Clause", "Waiting Period", etc.
+
+## FINAL ANSWER:
 """
 
 async def retrive_context(query: str, namespace: str) -> str:
@@ -40,7 +48,7 @@ async def retrive_context(query: str, namespace: str) -> str:
         index.search,
         namespace=namespace,
         query={
-            "top_k": 3,
+            "top_k": 4,
             "inputs": {"text": query},
         }
     )
@@ -70,7 +78,7 @@ async def ask_llm(query: str, context: str) -> str:
     body = {
         "model": "llama3-70b-8192",  # or "mixtral-8x7b-32768" if preferred
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 512,
+        "max_tokens": 1024,
         "temperature": 0.0,
     }
     

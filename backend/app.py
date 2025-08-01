@@ -9,7 +9,7 @@ from populate_db import load_documents, split_documents, add_to_pinecone
 from query import query_rag
 from util.compute_hash import compute_hash
 
-from pinecone_client import index
+from pinecone_client import index, pinecone_client, index_name
 
 load_dotenv()
 
