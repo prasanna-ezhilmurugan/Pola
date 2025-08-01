@@ -10,7 +10,9 @@ from query import query_rag
 from util.compute_hash import compute_hash
 
 from pinecone_client import index, pinecone_client, index_name
-from logging import log_info, global_logger_state
+from qlog import log_info, global_logger_state
+
+global_logger_state.line_limit = 5
 
 load_dotenv()
 

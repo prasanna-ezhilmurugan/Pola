@@ -4,7 +4,7 @@ from langchain.prompts import PromptTemplate
 # from langchain_community.llms.ollama import Ollama
 # from util.embedding_function import get_embedding_function
 from pinecone_client import index
-from logging import log_info, global_logger_state
+from qlog import log_info, global_logger_state
 
 import httpx
 import time

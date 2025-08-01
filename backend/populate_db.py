@@ -15,7 +15,7 @@ from langchain_community.document_loaders import (
 )
 
 from pinecone_client import index
-from logging import log_info, global_logger_state
+from qlog import log_info, global_logger_state
 
 import os
 import time

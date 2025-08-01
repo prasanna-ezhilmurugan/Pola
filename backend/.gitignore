@@ -1,5 +1,6 @@
 .env
 __pycache__/
 util/__pycache__/
+logs.txt
 
 
