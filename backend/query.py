@@ -84,7 +84,8 @@ async def ask_llm(query: str, context: str) -> str:
     }
     
     max_retries = 5
-    for _ in range(max_retries):
+    backoff_base = 2
+    for attempt in range(max_retries):
         start = time.time()
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
@@ -93,7 +94,7 @@ async def ask_llm(query: str, context: str) -> str:
                 json=body
             )
             if response.status_code == 429:
-                wait_time = 3
+                wait_time = backoff_base ** attempt + random.uniform(0, 1)
                 print(f"Received 429. Retrying in {wait_time:.2f} seconds...")
                 await asyncio.sleep(wait_time)
                 continue
