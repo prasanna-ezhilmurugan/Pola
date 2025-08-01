@@ -10,6 +10,7 @@ from pinecone_client import index
 import httpx
 import time
 import os
+import random
 
 # CHROMA_PATH = "../data/processed"
 
@@ -82,30 +83,24 @@ async def ask_llm(query: str, context: str) -> str:
         "temperature": 0.0,
     }
     
-    # print(f"[INFO] Asking LLM with prompt: {prompt}")
-
-    # Run blocking Mistral API call in a thread
-    start = time.time()
-    # client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
-    # chat_response = await asyncio.to_thread(
-    #     client.chat.complete,
-    #     model="mistral-small",
-    #     messages=[
-    #         {"role": "user", "content": prompt}
-    #     ]
-    # )
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers=headers,
-            json=body
-        )
-        response.raise_for_status()
-        data = response.json()
-        
-    print(f"Time taken to query: {time.time() - start} seconds")
-    # return chat_response.choices[0].message.content
-    return data["choices"][0]["message"]["content"]
+    max_retries = 5
+    for _ in range(max_retries):
+        start = time.time()
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers=headers,
+                json=body
+            )
+            if response.status_code == 429:
+                wait_time = 3
+                print(f"Received 429. Retrying in {wait_time:.2f} seconds...")
+                await asyncio.sleep(wait_time)
+                continue
+            response.raise_for_status()
+            data = response.json()
+            print(f"Time taken to query: {time.time() - start} seconds")
+            return data["choices"][0]["message"]["content"]
 
 async def query_rag(query_text: str, namespace: str):
     context_text = await retrive_context(query_text, namespace)
