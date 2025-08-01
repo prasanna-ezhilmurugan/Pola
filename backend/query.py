@@ -3,9 +3,8 @@ from langchain_chroma import Chroma
 from langchain.prompts import PromptTemplate
 # from langchain_community.llms.ollama import Ollama
 # from util.embedding_function import get_embedding_function
-from mistralai import Mistral
-from groq import Groq
 from pinecone_client import index
+from logging import log_info, global_logger_state
 
 import httpx
 import time
@@ -35,7 +34,7 @@ You are a policy analyst AI trained to extract precise and structured answers fr
 - If the answer is not present, say: **"The provided document does not contain the answer."**
 
 ## FORMAT:
-- Respond in 1–2 well-structured sentences.
+- Respond in only **one** well-structured sentence.
 - Use clear and formal language.
 - Use policy-specific terms such as "Sum Insured", "Clause", "Waiting Period", etc.
 
@@ -95,12 +94,12 @@ async def ask_llm(query: str, context: str) -> str:
             )
             if response.status_code == 429:
                 wait_time = backoff_base ** attempt + random.uniform(0, 1)
-                print(f"Received 429. Retrying in {wait_time:.2f} seconds...")
+                log_info(global_logger_state, f"Received 429. Retrying in {wait_time:.2f} seconds...")
                 await asyncio.sleep(wait_time)
                 continue
             response.raise_for_status()
             data = response.json()
-            print(f"Time taken to query: {time.time() - start} seconds")
+            log_info(global_logger_state, f"Time taken to query: {time.time() - start} seconds")
             return data["choices"][0]["message"]["content"]
 
 async def query_rag(query_text: str, namespace: str):

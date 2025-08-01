@@ -14,7 +14,8 @@ from langchain_community.document_loaders import (
     TextLoader,
 )
 
-from pinecone_client import index, pinecone_client
+from pinecone_client import index
+from logging import log_info, global_logger_state
 
 import os
 import time
@@ -96,7 +97,5 @@ async def add_to_pinecone(documents, namespace):
         chunk = documents[i:i + 50]
         await upsert_chunk(chunk)
 
-    print("-" * 40)
-    print("Documents added to Pinecone successfully.")
-    print(f"Time taken to embed: {time.time() - start} seconds")
-    print("-" * 40)
+    log_info(global_logger_state, f"Added chunks to Pinecone under namespace: {namespace}")
+    log_info(global_logger_state, f"Time taken to add chunks to Pinecone: {time.time() - start} seconds")

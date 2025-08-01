@@ -10,6 +10,7 @@ from query import query_rag
 from util.compute_hash import compute_hash
 
 from pinecone_client import index, pinecone_client, index_name
+from logging import log_info, global_logger_state
 
 load_dotenv()
 
@@ -28,7 +29,7 @@ UPLOAD_FOLDER = '../data/upload'
 @app.post("/api/v1/hackrx/run")
 async def hackrx_run(request: Request):
     # print request to text
-    print(f"[INFO] Received request: {await request.body()}")
+    log_info(global_logger_state, f"Received request: {await request.body()}")
     
     # Check for authorization header
     auth_header = request.headers.get('authorization')
@@ -58,9 +59,9 @@ async def hackrx_run(request: Request):
 
     # Step 3: If namespace does not exist, load and process the document
     if existing.get('namespaces', {}).get(namespace, {}).get('vector_count', 0) > 0:
-      print(f"[INFO] Document already exists in index under namespace: {namespace}")
+      log_info(global_logger_state, f"Document already exists in index under namespace: {namespace}")
     else:
-      print(f"[INFO] Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
+      log_info(global_logger_state, f"Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
       document = await load_documents(document_url)
       chunks = await split_documents(document)
       await add_to_pinecone(chunks, namespace)
