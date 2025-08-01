@@ -18,13 +18,13 @@ def log_log(state, type, msg, timestamp):
     if state.line_limit > 0 and state.lines % state.line_limit == 0:
         log_append_to_file(state, state.default_file)
 
-def log_info(state, msg, timestamp=False):
+def log_info(state, msg, timestamp=True):
     log_log(state, "INFO", msg, timestamp)
 
-def log_warn(state, msg, timestamp=False):
+def log_warn(state, msg, timestamp=True):
     log_log(state, "WARN", msg, timestamp)
     
-def log_error(state, msg, timestamp=False):
+def log_error(state, msg, timestamp=True):
     log_log(state, "ERROR", msg, timestamp)
     
 def log_write_to_file(state, filename):
