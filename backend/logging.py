@@ -4,7 +4,6 @@ class LoggerState:
     buffer = []
     line_limit = 0
     lines = 0
-    curr = 0
     default_file = "logs.txt"
 
 global_logger_state = LoggerState()
@@ -34,7 +33,6 @@ def log_write_to_file(state, filename):
         f.write("\n")
         f.flush()
     state.buffer.clear()
-    state.curr = 0
 
 def log_append_to_file(state, filename):
    with open(filename, "a") as f:
@@ -42,5 +40,4 @@ def log_append_to_file(state, filename):
         f.write("\n")
         f.flush()
    state.buffer.clear()
-   state.curr = 0
 
