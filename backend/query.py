@@ -14,7 +14,7 @@ import random
 # CHROMA_PATH = "../data/processed"
 
 PROMPT_TEMPLATE = """
-You are a policy analyst AI trained to extract precise and structured answers from health insurance documents. Use the context provided to answer the user's question clearly and professionally.
+You are a professional policy analyst. Given the context, answer the user's question with precision, completeness, and clarity. Use appropriate terminology.
 
 ## CONTEXT:
 {context}
@@ -23,20 +23,17 @@ You are a policy analyst AI trained to extract precise and structured answers fr
 {question}
 
 ## GUIDELINES:
-- Base your answer **only** on the context provided.
-- The answer should:
-  1. Start with a **direct yes/no or definition**, if applicable.
-  2. Include **conditions, eligibility, or policy duration**, if relevant.
-  3. Mention **numerical limits, caps, or time frames** when stated.
-  4. Quote or summarize clauses or sections **if they’re explicitly present**.
-- Do **not** fabricate or assume details not included in the context.
-- Avoid generic disclaimers (e.g., "based on the context", "based on the chunk").
-- If the answer is not present, say: **"The provided document does not contain the answer."**
-
-## FORMAT:
-- Respond in only **one** well-structured sentence.
-- Use clear and formal language.
-- Use policy-specific terms such as "Sum Insured", "Clause", "Waiting Period", etc.
+- Answer **only** using the provided context. Never guess or fabricate.
+- If the question has **multiple subparts**, answer each one concisly with a comma.
+- If applicable, your response must:
+  1. Start with a **direct yes/no or definition**.
+  2. Include **eligibility criteria, age limits, or duration clauses**.
+  3. Mention **waiting periods, co-payments, Sum Insured limits, exclusions**, etc.
+  4. Do not quote or paraphrase specific **Clause numbers** or section titles when available.
+- If **any subpart is not addressed** in the context, write:  
+  - `The document does not contain the answer.`  
+    (Use this only **per subpart**, not for the entire question unless fully absent.)
+- Do **not** refer to "chunks", "context", or "PDF" in your response.
 
 ## FINAL ANSWER:
 """
@@ -79,14 +76,14 @@ async def ask_llm(query: str, context: str) -> str:
         "model": "llama3-70b-8192",  # or "mixtral-8x7b-32768" if preferred
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 1024,
-        "temperature": 0.0,
+        "temperature": 0.3,
     }
     
     max_retries = 5
     backoff_base = 2
     for attempt in range(max_retries):
         start = time.time()
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,

@@ -1,5 +1,4 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema import Document
 # from langchain_chroma import Chroma
 
 # from util.embedding_function import get_embedding_function
@@ -73,7 +72,7 @@ async def load_documents(url):
   
 
 async def split_documents(documents):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50, add_start_index=True)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=200, add_start_index=True)
     def split():
         records = []
         for idx, split in enumerate(text_splitter.split_documents(documents)):
