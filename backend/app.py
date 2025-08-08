@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 import os
 import asyncio
 
-from populate_db import load_documents, split_documents, add_to_pinecone
+from populate_db import load_documents, split_documents, add_to_db
 from query import query_rag
 from util.compute_hash import compute_hash
 
-from pinecone_client import index, pinecone_client, index_name
+# from pinecone_client import index, pinecone_client, index_name
 from qlog import log_info, global_logger_state
 
 global_logger_state.line_limit = 5
@@ -57,16 +57,16 @@ async def hackrx_run(request: Request):
     namespace = f"doc-{document_hash}"
 
     # Step 2: Check if Pinecone namespace already exists
-    existing = await asyncio.to_thread(index.describe_index_stats, namespace=namespace)
+    # existing = await asyncio.to_thread(index.describe_index_stats, namespace=namespace)
 
     # Step 3: If namespace does not exist, load and process the document
-    if existing.get('namespaces', {}).get(namespace, {}).get('vector_count', 0) > 0:
-      log_info(global_logger_state, f"Document already exists in index under namespace: {namespace}")
-    else:
-      log_info(global_logger_state, f"Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
-      document = await load_documents(document_url)
-      chunks = await split_documents(document)
-      await add_to_pinecone(chunks, namespace)
+    # if existing.get('namespaces', {}).get(namespace, {}).get('vector_count', 0) > 0:
+    #   log_info(global_logger_state, f"Document already exists in index under namespace: {namespace}")
+    # else:
+    #   log_info(global_logger_state, f"Document not found in index. Processing and adding to Pinecone under namespace: {namespace}")
+    document = await load_documents(document_url)
+    chunks = await split_documents(document)
+    await add_to_db(chunks, namespace)
 
     # You can use asyncio for parallel execution if query_rag is async
     response = await asyncio.gather(*(query_rag(q, namespace) for q in questions))

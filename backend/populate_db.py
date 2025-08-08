@@ -1,5 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-# from langchain_chroma import Chroma
+from chroma_db import chroma_db
+from langchain_core.documents import Document
 
 # from util.embedding_function import get_embedding_function
 
@@ -13,14 +14,12 @@ from langchain_community.document_loaders import (
     TextLoader,
 )
 
-from pinecone_client import index
+# from pinecone_client import index
 from qlog import log_info, global_logger_state
 
 import os
 import time
 import asyncio
-
-# CHROMA_PATH = "../data/processed"
 
 def get_file_extension_from_url(url: str) -> str:
     parsed = urlparse(url)
@@ -77,24 +76,18 @@ async def split_documents(documents):
         records = []
         for idx, split in enumerate(text_splitter.split_documents(documents)):
             meta = normalize_metadata(split.metadata)
-            records.append({
-                "_id": f"document#chunk{idx}",
-                **meta,
-                "chunk_text": split.page_content
-            })
+            records.append(Document(
+                id = f"document#chunk{idx}",
+                metadata = meta,
+                page_content = split.page_content
+            ))
         return records
     return await asyncio.to_thread(split)
 
-async def add_to_pinecone(documents, namespace):
+async def add_to_db(documents, namespace):
     start = time.time()
 
-    async def upsert_chunk(chunk):
-        await asyncio.to_thread(index.upsert_records, namespace=namespace, records=chunk)
+    chroma_db.add_documents(documents=documents)
 
-    # Upsert in parallel for better performance
-    for i in range(0, len(documents), 50):
-        chunk = documents[i:i + 50]
-        await upsert_chunk(chunk)
-
-    log_info(global_logger_state, f"Added chunks to Pinecone under namespace: {namespace}")
-    log_info(global_logger_state, f"Time taken to add chunks to Pinecone: {time.time() - start} seconds")
+    log_info(global_logger_state, f"Added chunks to DB under namespace: {namespace}")
+    log_info(global_logger_state, f"Time taken to add chunks to DB: {time.time() - start} seconds")

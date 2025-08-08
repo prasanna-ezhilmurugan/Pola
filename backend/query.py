@@ -3,7 +3,8 @@ from langchain_chroma import Chroma
 from langchain.prompts import PromptTemplate
 # from langchain_community.llms.ollama import Ollama
 # from util.embedding_function import get_embedding_function
-from pinecone_client import index
+# from pinecone_client import index
+from chroma_db import chroma_db
 from qlog import log_info, global_logger_state
 
 import httpx
@@ -42,19 +43,18 @@ async def retrive_context(query: str, namespace: str) -> str:
 
     # Run blocking Pinecone search in a thread
     results = await asyncio.to_thread(
-        index.search,
-        namespace=namespace,
-        query={
-            "top_k": 4,
-            "inputs": {"text": query},
-        }
+        chroma_db.similarity_search,
+        query,
+        k = 4,
     )
 
+    # print(results)
+
     chunks = []
-    for i, result in enumerate(results['result']['hits']):
-        feilds = result['fields']
-        text = feilds.get("chunk_text", "")
-        page = feilds.get("page", "N/A")
+    for i, result in enumerate(results):
+        meta = result.metadata
+        text = result.page_content
+        page = meta['page']
         label = f"### chunk {i + 1} (Page {page})"
         formatted_chunk = f"{label}\n\n{text}"
         chunks.append(formatted_chunk)
